@@ -23,11 +23,6 @@ if selection.isEmpty then
     return 
 end
 
-if selection.bounds.width ~= 16 and selection.bounds.height ~= 16 then
-    print("Only supports 16x16 tiles")
-    return
-end
-
 function CopyImage(fromImage, rect, newImageSize)
   widthCorrection = widthCorrection or 0
   heightCorrection = heightCorrection or 0
@@ -41,88 +36,61 @@ function CopyImage(fromImage, rect, newImageSize)
   return selectedImage
 end
 
-function Rotate45Degress(image2Rotate)
-    local RotationRand = 0.785398
-    local maxSizeConst = 1.412
-    local maskColor = image2Rotate.spec.transparentColor
-    local maxSize = math.floor(image2Rotate.width * maxSizeConst)
-    if math.floor(image2Rotate.height * maxSizeConst) > maxSize then
-      maxSize = math.floor(image2Rotate.height * maxSizeConst)
+--loop through x texture coords
+function ToIso(fromImage, rect, newImageSize)
+  local pixelsFromSelection = fromImage:pixels(rect)
+  local selectedImage = Image(newImageSize.x, newImageSize.y)
+
+  for it in pixelsFromSelection do
+    local pixelValue = it()
+    
+    local newx = (newImageSize.x/2-2)+it.x*2-it.y*2
+    local newy = it.x+it.y
+    local stopx = newx+3
+    for tempx=newx,stopx,1 do
+      --add one to y axis so the resize would work
+      selectedImage:putPixel(tempx, newy+1, pixelValue)
     end
-    if maxSize%2 == 1 then
-      maxSize = maxSize + 1
-    end
-    -- maxSize is a even number
-    local centeredImage = Image(maxSize, maxSize)
-    -- center image2Rotate in the new image 'centeredImage'
-    local image2RotatePosition = Point((centeredImage.width - image2Rotate.width) / 2, (centeredImage.height - image2Rotate.height) / 2)
-    for y=image2RotatePosition.y, image2RotatePosition.y + image2Rotate.height - 1, 1 do
-      for x=image2RotatePosition.x, image2RotatePosition.x + image2Rotate.width - 1, 1 do
-        centeredImage:drawPixel(x, y, image2Rotate:getPixel(x - image2RotatePosition.x, y - image2RotatePosition.y))
-      end
-    end
-  
-    local pivot = Point(centeredImage.width / 2 - 0.5 + (image2Rotate.width % 2) * 0.5, centeredImage.height / 2 - 0.5 + (image2Rotate.height % 2) * 0.5)
-    local outputImg = Image(centeredImage.width, centeredImage.height)
-  
-    for y = 0 , centeredImage.height-1, 1 do
-      for x = 0, centeredImage.width-1, 1 do
-        local oposite = pivot.x - x
-        local adyacent = pivot.y - y
-        local hypo = math.sqrt(oposite^2 + adyacent^2)
-        if hypo == 0.0 then
-          local px = centeredImage:getPixel(x, y)
-          outputImg:drawPixel(x, y, px)
-        else
-          local currentAngle = math.asin(oposite / hypo)
-          local resultAngle
-          local u
-          local v
-          if adyacent < 0 then
-            resultAngle = currentAngle + RotationRand
-            v = - hypo * math.cos(resultAngle)
-          else
-            resultAngle = currentAngle - RotationRand
-            v = hypo * math.cos(resultAngle)
-          end
-          u = hypo * math.sin(resultAngle)
-          if centeredImage.width / 2 - u >= 0 and
-            centeredImage.height / 2 - v >= 0 and
-            centeredImage.height / 2 - v < centeredImage.height and
-            centeredImage.width / 2 - u < centeredImage.width then
-            local px = centeredImage:getPixel(centeredImage.width / 2 - u, centeredImage.height / 2 - v)
-            if px ~= maskColor then
-              outputImg:drawPixel(x, y, px)
-            end
-          end
-        end
-      end
-    end 
-    return outputImg
   end
 
-local currentImage = Image(sprite)
-local selectedImage = CopyImage(currentImage, selection.bounds, Point(16,16))
-originPoint = selection.origin
+  selectedImage:putPixel(newImageSize.x - 1, newImageSize.y - 1, redPixel)
+  return selectedImage
+end
 
-selectedImage:resize{size=Size(selectedImage.width + 1, selectedImage.height + 1)}
+local isometricTile
 
-local newImage = Rotate45Degress(selectedImage)
+if selection.bounds.width == 16 and selection.bounds.height == 16 then
+  -- do for 16x16
+  local currentImage = Image(sprite)
+  local selectedImage = CopyImage(currentImage, selection.bounds, Point(16,16))
+  originPoint = selection.origin
+ 
+  isometricTile = ToIso(selectedImage, Rectangle(0,0,16,16), Point(64,32))
 
-local resultImage = CopyImage(newImage, Rectangle(0,1,24,23), Point(24,23))
+  isometricTile:resize{width=32,height=16}
+  
+elseif selection.bounds.width == 32 and selection.bounds.height == 32 then
+  -- do for 32x32
+  local currentImage = Image(sprite)
+  local selectedImage = CopyImage(currentImage, selection.bounds, Point(32,32))
+  originPoint = selection.origin
 
-resultImage:resize(24,12)
+  isometricTile = ToIso(selectedImage, Rectangle(0,0,32,32), Point(128,64))
 
-local finalImage = CopyImage(resultImage, Rectangle(0,1,24,12), Point(24,11))
+  isometricTile:resize{width=64,height=32}
+
+else
+  print("Only supports 16x16, 32x32 tiles")
+  return
+end
+
 
 local outputLayer = sprite:newLayer()
-outputLayer.name = "Hej"
+outputLayer.name = "IsometricTile"
 local outputSprite = outputLayer.sprite
 local cel = sprite:newCel(outputLayer, activeFrame)
-print(outputSprite.width)
-print(outputSprite.height)
-local ultimaImage = Image(outputSprite.width,outputSprite.height)
-ultimaImage:drawImage(finalImage, originPoint)
-print(originPoint)
-cel.image = ultimaImage
+local backToOriginImage = Image(outputSprite.width,outputSprite.height)
+--backToOriginImage:drawImage(newIso, originPoint)
+backToOriginImage:drawImage(isometricTile, originPoint)
+cel.image = backToOriginImage
 
