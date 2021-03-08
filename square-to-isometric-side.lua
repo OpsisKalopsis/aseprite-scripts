@@ -21,9 +21,9 @@ if selection.bounds.width % 2 ~= 0 then
     print("The width must be an even number")
 end
 
-function CopyImage(fromImage, rect, newImageSize)
+function CopyImage(fromImage, rect)
     local pixelsFromSelection = fromImage:pixels(rect)
-    local selectedImage = Image(newImageSize.x, newImageSize.y + newImageSize.x/2)
+    local selectedImage = Image(rect.width, rect.height + rect.width/2)
     local yOffset = 0
     
     for it in pixelsFromSelection do
@@ -44,7 +44,7 @@ end
 
 originPoint = selection.origin
 local currentImage = Image(sprite)
-local selectedImage = CopyImage(currentImage, selection.bounds, Point(16,16))
+local selectedImage = CopyImage(currentImage, selection.bounds)
 
 local outputLayer = sprite:newLayer()
 outputLayer.name = "IsometricSide"
