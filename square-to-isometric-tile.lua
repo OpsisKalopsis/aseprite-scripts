@@ -23,9 +23,17 @@ if selection.isEmpty then
     return 
 end
 
+if selection.bounds.width % 2 ~= 0 then
+  print("The width must be an even number")
+  return
+end
+
+if selection.bounds.width ~= selection.bounds.height then
+  print("The selection must be a square")
+  return
+end
+
 function CopyImage(fromImage, rect, newImageSize)
-  widthCorrection = widthCorrection or 0
-  heightCorrection = heightCorrection or 0
   local pixelsFromSelection = fromImage:pixels(rect)
   local selectedImage = Image(newImageSize.x, newImageSize.y)
   
@@ -59,31 +67,16 @@ end
 
 local isometricTile
 
-if selection.bounds.width == 16 and selection.bounds.height == 16 then
-  -- do for 16x16
-  local currentImage = Image(sprite)
-  local selectedImage = CopyImage(currentImage, selection.bounds, Point(16,16))
-  originPoint = selection.origin
- 
-  isometricTile = ToIso(selectedImage, Rectangle(0,0,16,16), Point(64,32))
+local currentImage = Image(sprite)
+local oneSide = selection.bounds.width
+local selectedImage = CopyImage(currentImage, selection.bounds, Point(oneSide, oneSide))
 
-  isometricTile:resize{width=32,height=16}
-  
-elseif selection.bounds.width == 32 and selection.bounds.height == 32 then
-  -- do for 32x32
-  local currentImage = Image(sprite)
-  local selectedImage = CopyImage(currentImage, selection.bounds, Point(32,32))
-  originPoint = selection.origin
+originPoint = selection.origin
 
-  isometricTile = ToIso(selectedImage, Rectangle(0,0,32,32), Point(128,64))
+isometricTile = ToIso(selectedImage, Rectangle(0,0,oneSide,oneSide), Point(oneSide * 4,oneSide * 2))
 
-  isometricTile:resize{width=64,height=32}
-
-else
-  print("Only supports 16x16, 32x32 tiles")
-  return
-end
-
+isometricTile:resize{width=(oneSide*2),height=oneSide}
+isometricTile = CopyImage(isometricTile, Rectangle(0,1,oneSide*2,oneSide), Point(oneSide*2,oneSide))
 
 local outputLayer = sprite:newLayer()
 outputLayer.name = "IsometricTile"
