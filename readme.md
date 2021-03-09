@@ -11,3 +11,8 @@ Converts a selection to an isometric front tile, like a wall.
 ## square-to-isometric-side
 Converts a selection to an isometric side tile, like a wall.
 ![](assets/isometric-side.gif "Isometric-side")
+
+## Roadmap
+* Add a script that convert a file with square tiles and convert the tiles into isometric tiles in a new file.
+* Convert the scripts to an extension
+* Create a button bar
