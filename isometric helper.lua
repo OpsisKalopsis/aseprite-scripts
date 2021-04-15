@@ -57,7 +57,6 @@ function ToIso(fromImage, rect, newImageSize)
     end
   end
 
-  selectedImage:putPixel(newImageSize.x - 1, newImageSize.y - 1, redPixel)
   return selectedImage
 end
 
