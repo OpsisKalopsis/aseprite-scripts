@@ -30,4 +30,4 @@ The orthographic tileset exported to isometric tiles.
 
 
 ![](assets/iso-water-grass-map.png)  
-And this is an example when the new tileset is used to create som lovely islands.
+And this is an example when the new tileset is used to create some lovely isometric islands.
