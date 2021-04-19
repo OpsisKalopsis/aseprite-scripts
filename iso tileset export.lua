@@ -11,6 +11,15 @@ function ToogleDownscale()
   downscale = not downscale
 end
 
+function ValidateInput(dialogData)
+  local tileWidth = dialogData.tileWidth
+  if(tileWidth % 2 ~= 0) then
+    print("The Width/Height value must be an even number")
+    return false
+  end
+  return true
+end
+
 function CopyImage(fromImage, rect, newImageSize)
   local pixelsFromSelection = fromImage:pixels(rect)
   local selectedImage = Image(newImageSize.x, newImageSize.y)
@@ -73,6 +82,7 @@ function ConvertToIso(dialogData)
     for rows = 0, numberOfWidthTiles - 1 do
       local toRect = Rectangle(rows*newWidth, columns*newHeight, newWidth, newHeight)
       local fromRect = Rectangle(rows*tileWidth, columns*tileWidth, tileWidth, tileWidth)
+      --Move current image to 0,0 to skip working with offsets
       local resetImage = CopyImage(fromImage, fromRect, Point(tileWidth, tileWidth))
       local isometricTile = CreateIsoTile(resetImage, Rectangle(0,0,tileWidth, tileWidth), tileSize)
       if downscale then
@@ -107,7 +117,9 @@ dialog
         filetypes={ "png" }}
   :separator()
   :button{text="Export",onclick=function() 
-    ConvertToIso(dialog.data)
-    dialog:close() 
+    if(ValidateInput(dialog.data)) then
+      ConvertToIso(dialog.data)
+      dialog:close() 
+    end
   end}
   :show{wait=true}
