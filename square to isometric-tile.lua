@@ -5,12 +5,12 @@
 -- Markeringen skall vara tre pixlar över om det är 16x16
 -- Markeringen skall vara 6 pixlar över om det är 32x32
 
-local activeFrame = 1
 local originPoint
 
 
 -- bail if there's no active sprite
 local sprite = app.activeSprite
+local currentCel = app.activeCel
 if not sprite then 
     print("No sprite")
     return 
@@ -60,12 +60,15 @@ function ToIso(fromImage, rect, newImageSize)
       selectedImage:putPixel(tempx, newy+1, pixelValue)
     end
   end
+
+  selectedImage:putPixel(newImageSize.x - 1, newImageSize.y - 1, redPixel)
   return selectedImage
 end
 
 local isometricTile
 
-local currentImage = Image(sprite)
+local currentImage = Image(sprite.width, sprite.height)
+currentImage:drawSprite(sprite, currentCel.frameNumber)
 local oneSide = selection.bounds.width
 local selectedImage = CopyImage(currentImage, selection.bounds, Point(oneSide, oneSide))
 
@@ -79,7 +82,7 @@ isometricTile = CopyImage(isometricTile, Rectangle(0,1,oneSide*2,oneSide), Point
 local outputLayer = sprite:newLayer()
 outputLayer.name = "IsometricTile"
 local outputSprite = outputLayer.sprite
-local cel = sprite:newCel(outputLayer, activeFrame)
+local cel = sprite:newCel(outputLayer, currentCel.frameNumber)
 local backToOriginImage = Image(outputSprite.width,outputSprite.height)
 --backToOriginImage:drawImage(newIso, originPoint)
 backToOriginImage:drawImage(isometricTile, originPoint)

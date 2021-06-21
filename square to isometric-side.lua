@@ -5,6 +5,7 @@ local originPoint
 
 -- bail if there's no active sprite
 local sprite = app.activeSprite
+local currentCel = app.activeCel
 if not sprite then 
     print("No sprite")
     return 
@@ -43,13 +44,14 @@ function CopyImage(fromImage, rect)
 end
 
 originPoint = selection.origin
-local currentImage = Image(sprite)
+local currentImage = Image(sprite.width, sprite.height)
+currentImage:drawSprite(sprite, currentCel.frameNumber)
 local selectedImage = CopyImage(currentImage, selection.bounds)
 
 local outputLayer = sprite:newLayer()
 outputLayer.name = "IsometricSide"
 local outputSprite = outputLayer.sprite
-local cel = sprite:newCel(outputLayer, activeFrame)
+local cel = sprite:newCel(outputLayer, currentCel.frameNumber)
 local backToOriginImage = Image(outputSprite.width,outputSprite.height)
 --backToOriginImage:drawImage(newIso, originPoint)
 backToOriginImage:drawImage(selectedImage, originPoint)

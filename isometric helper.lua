@@ -56,7 +56,6 @@ function ToIso(fromImage, rect, newImageSize)
       selectedImage:putPixel(tempx, newy+1, pixelValue)
     end
   end
-
   return selectedImage
 end
 
@@ -98,14 +97,16 @@ function ToogleDownscale()
 end
 
 function ConvertToSide()
+  local currentCel = app.activeCel
   local sprite = app.activeSprite
   local selection = sprite.selection
-  originPoint = selection.origin
+  local originPoint = selection.origin
   if(not ValidateSelection(sprite, selection)) then
     return
   end
 
-  local currentImage = Image(sprite)
+  local currentImage = Image(sprite.width, sprite.height)
+  currentImage:drawSprite(sprite, currentCel.frameNumber)
   local selectedImage = SlideImage(currentImage, selection.bounds, false)
 
   app.transaction(
@@ -113,7 +114,7 @@ function ConvertToSide()
       local outputLayer = sprite:newLayer()
       outputLayer.name = "IsometricSide"
       local outputSprite = outputLayer.sprite
-      local cel = sprite:newCel(outputLayer, 1)
+      local cel = sprite:newCel(outputLayer, currentCel.frameNumber)
       local backToOriginImage = Image(outputSprite.width,outputSprite.height)
       backToOriginImage:drawImage(selectedImage, originPoint)
       cel.image = backToOriginImage
@@ -123,6 +124,7 @@ function ConvertToSide()
 end
 
 function ConvertToFront()
+  local currentCel = app.activeCel
   local sprite = app.activeSprite
   local selection = sprite.selection
   local originPoint = selection.origin
@@ -130,7 +132,8 @@ function ConvertToFront()
     return
   end
 
-  local currentImage = Image(sprite)
+  local currentImage = Image(sprite.width, sprite.height)
+  currentImage:drawSprite(sprite, currentCel.frameNumber)
   local selectedImage = SlideImage(currentImage, selection.bounds, true)
 
   app.transaction(
@@ -139,7 +142,7 @@ function ConvertToFront()
       local outputLayer = sprite:newLayer()
       outputLayer.name = "IsometricFront"
       local outputSprite = outputLayer.sprite
-      local cel = sprite:newCel(outputLayer, 1)
+      local cel = sprite:newCel(outputLayer, currentCel.frameNumber)
       local backToOriginImage = Image(outputSprite.width,outputSprite.height)
       backToOriginImage:drawImage(selectedImage, originPoint)
       cel.image = backToOriginImage
@@ -149,6 +152,7 @@ function ConvertToFront()
 end
 
 function ConvertToTile()
+  local currentCel = app.activeCel
   local sprite = app.activeSprite
   local selection = sprite.selection
   local originPoint = selection.origin
@@ -158,7 +162,8 @@ function ConvertToTile()
 
   local isometricTile
 
-  local currentImage = Image(sprite)
+  local currentImage = Image(sprite.width, sprite.height)
+  currentImage:drawSprite(sprite, currentCel.frameNumber)
   local oneSide = selection.bounds.width
   local selectedImage = CopyImage(currentImage, selection.bounds, Point(oneSide, oneSide))
 
@@ -179,7 +184,7 @@ function ConvertToTile()
       
       local backToOriginImage = Image(outputSprite.width,outputSprite.height)
       backToOriginImage:drawImage(isometricTile, originPoint)
-      local cel = outputSprite:newCel(outputLayer, 1)
+      local cel = outputSprite:newCel(outputLayer, currentCel.frameNumber)
       cel.image = backToOriginImage
     end
     )

@@ -5,6 +5,7 @@ local originPoint
 
 -- bail if there's no active sprite
 local sprite = app.activeSprite
+local currentCel = app.activeCel
 if not sprite then 
     print("No sprite")
     return 
@@ -22,35 +23,36 @@ if selection.bounds.width % 2 ~= 0 then
 end
 
 function CopyImage(fromImage, rect)
-    local pixelsFromSelection = fromImage:pixels(rect)
-    local selectedImage = Image(rect.width, rect.height + rect.width/2)
-    local yStartOffset = rect.width / 2
-    local yOffset = yStartOffset
-    
-    for it in pixelsFromSelection do
-      local pixelValue = it()
-      local newX = it.x - rect.x
-      local newY = it.y - rect.y
-      if(newX % 2 == 0) then
-        yOffset = yOffset - 1
-      end
-
-      if(newX == 0) then
-        yOffset = yStartOffset
-      end
-      selectedImage:putPixel(newX, newY + yOffset, pixelValue)
+  local pixelsFromSelection = fromImage:pixels(rect)
+  local selectedImage = Image(rect.width, rect.height + rect.width/2)
+  local yStartOffset = rect.width / 2
+  local yOffset = yStartOffset
+  
+  for it in pixelsFromSelection do
+    local pixelValue = it()
+    local newX = it.x - rect.x
+    local newY = it.y - rect.y
+    if(newX % 2 == 0) then
+      yOffset = yOffset - 1
     end
-    return selectedImage
+
+    if(newX == 0) then
+      yOffset = yStartOffset
+    end
+    selectedImage:putPixel(newX, newY + yOffset, pixelValue)
+  end
+  return selectedImage
 end
 
 originPoint = selection.origin
-local currentImage = Image(sprite)
+local currentImage = Image(sprite.width, sprite.height)
+currentImage:drawSprite(sprite, currentCel.frameNumber)
 local selectedImage = CopyImage(currentImage, selection.bounds)
 
 local outputLayer = sprite:newLayer()
 outputLayer.name = "IsometricFront"
 local outputSprite = outputLayer.sprite
-local cel = sprite:newCel(outputLayer, activeFrame)
+local cel = sprite:newCel(outputLayer, currentCel.frameNumber)
 local backToOriginImage = Image(outputSprite.width,outputSprite.height)
 --backToOriginImage:drawImage(newIso, originPoint)
 backToOriginImage:drawImage(selectedImage, originPoint)
