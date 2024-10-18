@@ -10,8 +10,8 @@ dlg
   :button{text="<Undo>",onclick=function() app.command.Undo() end}
   :button{text="<Redo>",onclick=function() app.command.Redo() end}
   :newrow()
-  :button{text="Brush+",onclick=function() app.command.ChangeBrush { change = "increment-size" } end}
   :button{text="Brush-",onclick=function() app.command.ChangeBrush { change = "decrement-size" } end}
+  :button{text="Brush+",onclick=function() app.command.ChangeBrush { change = "increment-size" } end}
   :newrow()
   :button{text="Layer↓", onclick=function() app.command.GotoPreviousLayer() end}
   :button{text="Layer↑", onclick=function() app.command.GotoNextLayer() end}
