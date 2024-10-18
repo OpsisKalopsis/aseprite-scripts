@@ -19,3 +19,4 @@ dlg
   :button{text="<",onclick=function() app.command.GotoPreviousFrame() end}
   :button{text=">",onclick=function() app.command.GotoNextFrame() end}
   :show{wait=false}
+  
